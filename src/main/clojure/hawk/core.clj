@@ -60,6 +60,8 @@
   (let [[opts
          groups] (if (map? opts) [opts groups] [{} (cons opts groups)])
         watcher (-> opts new-watcher)
+        kinds (or (:kinds opts)
+                  [:create :modify :delete])
         specs (mapcat
                 (fn [specs]
                   (let [a (agent {})]
@@ -80,7 +82,7 @@
         context* (apply juxt (map :context specs))]
     (context*)
     (doseq [path paths]
-      (watcher/register! watcher path [:create :modify :delete]))
+      (watcher/register! watcher path kinds))
     {:thread (doto
                (Thread.
                  (fn []
